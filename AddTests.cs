@@ -56,7 +56,8 @@ namespace MH.GCTests
             Assert.That(mem1, Is.EqualTo(startMem));
 
             //------------------//
-            Debug.Log($"startMem = {startMem}, mem1={mem1}");
+            Debug.Log(string.Format("startMem = {0}, mem1 = {1}", startMem, mem1));
+            
         }
 
         [Test]
@@ -83,7 +84,7 @@ namespace MH.GCTests
             Assert.That(mem1, Is.EqualTo(startMem));
 
             //------------------//
-            Debug.Log($"startMem = {startMem}, mem1={mem1}");
+            Debug.Log(string.Format("startMem = {0}, mem1 = {1}", startMem, mem1));
         }
 
         [Test]
@@ -110,7 +111,7 @@ namespace MH.GCTests
             Assert.That(mem1, Is.EqualTo(startMem));
 
             //------------------//
-            Debug.Log($"startMem = {startMem}, mem1={mem1}");
+            Debug.Log(string.Format("startMem = {0}, mem1 = {1}", startMem, mem1));
         }
 
         [Test]
@@ -137,7 +138,7 @@ namespace MH.GCTests
             Assert.That(mem1, Is.EqualTo(startMem));
 
             //------------------//
-            Debug.Log($"startMem = {startMem}, mem1={mem1}");
+            Debug.Log(string.Format("startMem = {0}, mem1 = {1}", startMem, mem1));
         }
 
         [Test]
@@ -164,7 +165,7 @@ namespace MH.GCTests
             Assert.That(mem1, Is.EqualTo(startMem));
 
             //------------------//
-            Debug.Log($"startMem = {startMem}, mem1={mem1}");
+            Debug.Log(string.Format("startMem = {0}, mem1 = {1}", startMem, mem1));
         }
 
         [Test]
@@ -191,7 +192,7 @@ namespace MH.GCTests
             Assert.That(mem1, Is.EqualTo(startMem));
 
             //------------------//
-            Debug.Log($"startMem = {startMem}, mem1={mem1}");
+            Debug.Log(string.Format("startMem = {0}, mem1 = {1}", startMem, mem1));            
         }
 
         //////////////////////////////////////////////////////////////////
@@ -222,7 +223,7 @@ namespace MH.GCTests
             Assert.That(mem1, Is.GreaterThan(startMem));
 
             //------------------//
-            Debug.Log($"startMem = {startMem}, mem1={mem1}");
+            Debug.Log(string.Format("startMem = {0}, mem1 = {1}", startMem, mem1));
         }
 
         [Test]
@@ -249,7 +250,7 @@ namespace MH.GCTests
             Assert.That(mem1, Is.GreaterThan(startMem));
 
             //------------------//
-            Debug.Log($"startMem = {startMem}, mem1={mem1}");
+            Debug.Log(string.Format("startMem = {0}, mem1 = {1}", startMem, mem1));
         }
     }
 

@@ -55,7 +55,7 @@ namespace MH.GCTests
             Assert.That(mem2, Is.EqualTo(startMem));
 
             //------------------//
-            Debug.Log($"startMem = {startMem}, mem1={mem1}, mem2={mem2}");
+            Debug.Log(string.Format("startMem = {0}, mem1 = {1}, mem2 = {2}", startMem, mem1, mem2));
         }
 
         [Test]
@@ -87,7 +87,7 @@ namespace MH.GCTests
             Assert.That(mem2, Is.EqualTo(startMem));
 
             //------------------//
-            Debug.Log($"startMem = {startMem}, mem1={mem1}, mem2={mem2}");
+            Debug.Log(string.Format("startMem = {0}, mem1 = {1}, mem2 = {2}", startMem, mem1, mem2));
         }
 
         [Test]
@@ -118,7 +118,7 @@ namespace MH.GCTests
             Assert.That(mem2, Is.EqualTo(startMem));
 
             //------------------//
-            Debug.Log($"startMem = {startMem}, mem1={mem1}, mem2={mem2}");
+            Debug.Log(string.Format("startMem = {0}, mem1 = {1}, mem2 = {2}", startMem, mem1, mem2));
         }
 
         [Test]
@@ -149,7 +149,7 @@ namespace MH.GCTests
             Assert.That(mem2, Is.EqualTo(startMem));
 
             //------------------//
-            Debug.Log($"startMem = {startMem}, mem1={mem1}, mem2={mem2}");
+            Debug.Log(string.Format("startMem = {0}, mem1 = {1}, mem2 = {2}", startMem, mem1, mem2));
         }
 
         [Test]
@@ -180,7 +180,7 @@ namespace MH.GCTests
             Assert.That(mem2, Is.EqualTo(startMem));
 
             //------------------//
-            Debug.Log($"startMem = {startMem}, mem1={mem1}, mem2={mem2}");
+            Debug.Log(string.Format("startMem = {0}, mem1 = {1}, mem2 = {2}", startMem, mem1, mem2));
         }
 
         [Test]
@@ -205,7 +205,7 @@ namespace MH.GCTests
             Assert.That(mem1, Is.EqualTo(startMem));
 
             //------------------//
-            Debug.Log($"startMem = {startMem}, mem1={mem1}");
+            Debug.Log(string.Format("startMem = {0}, mem1 = {1}", startMem, mem1));
         }
 
         //////////////////////////////////////////////////////
@@ -247,7 +247,7 @@ namespace MH.GCTests
             // rec2.Record();
 
             //------------------//
-            Debug.Log($"startMem = {startMem}, mem1={mem1}, mem2={mem2}");
+            Debug.Log(string.Format("startMem = {0}, mem1 = {1}, mem2 = {2}", startMem, mem1, mem2));
             // rec0.Output();
             // rec1.Output();
             // rec2.Output();
@@ -286,7 +286,7 @@ namespace MH.GCTests
             Assert.That(mem2, Is.GreaterThan(startMem));
 
             //------------------//
-            Debug.Log($"startMem = {startMem}, mem1={mem1}, mem2={mem2}");
+            Debug.Log(string.Format("startMem = {0}, mem1 = {1}, mem2 = {2}", startMem, mem1, mem2));
         }
 
         // private void _OutputAll()
