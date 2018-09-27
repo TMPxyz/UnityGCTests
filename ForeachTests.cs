@@ -312,8 +312,9 @@ namespace MH.GCTests
         }
         public void Output()
         {
-            string s = $"enabled={Profiler.enabled}, usedHeapSizeLong={usedHeapSizeLong}, monoHeapSize={monoHeapSize}, monoUsedSize={monoUsedSize}, tempAllocator={tempAllocator}, totalAllocate={totalAllocate}";
-            Dbg.Log(s);
+            // string s = $"enabled={Profiler.enabled}, usedHeapSizeLong={usedHeapSizeLong}, monoHeapSize={monoHeapSize}, monoUsedSize={monoUsedSize}, tempAllocator={tempAllocator}, totalAllocate={totalAllocate}";
+            string s = string.Format("enabled={0}, usedHeapSizeLong={1}, monoHeapSize={2}, monoUsedSize={3}, tempAllocator={4}, totalAllocate={5}", Profiler.enabled, usedHeapSizeLong, monoHeapSize, monoUsedSize, tempAllocator, totalAllocate);
+            Debug.Log(s);
         }
     }
 
