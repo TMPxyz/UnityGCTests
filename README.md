@@ -1,5 +1,5 @@
 # UnityGCTests
-A group of unit tests for checking if some methods are **"GC Free"**
+A group of unity3d unit tests for checking if some methods are **"GC Free"**
 
 ## How to install
 
