@@ -58,6 +58,40 @@ namespace MH.GCTests
         }
 
         [Test]
+        public void OK_ReadOnlyCollection()
+        {
+            var lst = new List<DummyObjA>();
+            for(int i=0; i<ELEM_COUNT; ++i)
+                lst.Add(new DummyObjA(i));
+
+            var cont = lst.AsReadOnly();
+            
+            GC.Collect();
+            long startMem = Profiler.GetMonoUsedSizeLong();
+
+            //------------------//
+            int x = 0;
+            for(int i=0; i<LOOP_COUNT; ++i)
+                foreach(var elem in cont)
+                    x += elem.v;
+
+            long mem1 = Profiler.GetMonoUsedSizeLong();
+            Assert.That(mem1, Is.EqualTo(startMem));
+
+            //------------------//
+            x = 0;
+            for(int i=0; i<LOOP_COUNT; ++i)
+                for(var ie = cont.GetEnumerator(); ie.MoveNext(); )
+                    x += ie.Current.v;
+
+            long mem2 = Profiler.GetMonoUsedSizeLong();
+            Assert.That(mem2, Is.EqualTo(startMem));
+
+            //------------------//
+            Debug.Log(string.Format("startMem = {0}, mem1 = {1}, mem2 = {2}", startMem, mem1, mem2));
+        }
+
+        [Test]
         public void OK_Dictionary()
         {
             var cont = new Dictionary<string, DummyObjA>();
