@@ -241,6 +241,56 @@ namespace MH.GCTests
             Debug.Log(string.Format("startMem = {0}, mem1 = {1}", startMem, mem1));
         }
 
+        [Test]
+        public void OK_Dictionary_Keys()
+        {
+            var cont = new Dictionary<int, DummyObjA>();
+            for(int i=0; i<ELEM_COUNT; ++i)
+                cont.Add(i, new DummyObjA(i));
+            
+            GC.Collect();
+            long startMem = Profiler.GetMonoUsedSizeLong();
+
+            int x = 0;
+            for(int i=0; i<LOOP_COUNT; ++i)
+            {
+                var keys = cont.Keys;
+                for(var ie = keys.GetEnumerator(); ie.MoveNext(); )
+                    x += cont[ ie.Current ].v;
+            }
+
+            long mem1 = Profiler.GetMonoUsedSizeLong();
+            Assert.That(mem1, Is.EqualTo(startMem));
+
+            //------------------//
+            Debug.Log(string.Format("startMem = {0}, mem1 = {1}", startMem, mem1));
+        }
+
+        [Test]
+        public void OK_Dictionary_Values()
+        {
+            var cont = new Dictionary<int, DummyObjA>();
+            for(int i=0; i<ELEM_COUNT; ++i)
+                cont.Add(i, new DummyObjA(i));
+            
+            GC.Collect();
+            long startMem = Profiler.GetMonoUsedSizeLong();
+
+            int x = 0;
+            for(int i=0; i<LOOP_COUNT; ++i)
+            {
+                var collection = cont.Values;
+                for(var ie = collection.GetEnumerator(); ie.MoveNext(); )
+                    x += ie.Current.v;
+            }
+
+            long mem1 = Profiler.GetMonoUsedSizeLong();
+            Assert.That(mem1, Is.EqualTo(startMem));
+
+            //------------------//
+            Debug.Log(string.Format("startMem = {0}, mem1 = {1}", startMem, mem1));
+        }
+
         //////////////////////////////////////////////////////
         /// below are tests which are GC_Dirty
         //////////////////////////////////////////////////////
