@@ -48,6 +48,60 @@ namespace MH.GCTests
         }
 
         [Test]
+        public void BAD_MemberMethod()
+        {
+            var cont = new List<DummyObjA>();
+            for(int i=0; i<ELEM_COUNT; ++i)
+                cont.Add(new DummyObjA(i));
+
+            GC.Collect();
+            long startMem = Profiler.GetMonoUsedSizeLong();
+
+            //------------------//
+            for(int i=0; i<LOOP_COUNT; ++i)
+                for(int j=0; j<ELEM_COUNT; ++j)       
+                    cont.ForEach( x => _ProcessDummyObj(x) );
+
+            long mem1 = Profiler.GetMonoUsedSizeLong();
+            Assert.That(mem1, Is.GreaterThan(startMem));
+
+            //------------------//
+            Debug.Log(string.Format("startMem = {0}, mem1 = {1}", startMem, mem1));
+        }
+
+        private void _ProcessDummyObj(DummyObjA o)
+        {
+            o.v ++;
+        }
+
+        [Test]
+        public void OK_StaticMethod()
+        {
+            var cont = new List<DummyObjA>();
+            for(int i=0; i<ELEM_COUNT; ++i)
+                cont.Add(new DummyObjA(i));
+
+            GC.Collect();
+            long startMem = Profiler.GetMonoUsedSizeLong();
+
+            //------------------//
+            for(int i=0; i<LOOP_COUNT; ++i)
+                for(int j=0; j<ELEM_COUNT; ++j)       
+                    cont.ForEach( x => _StaticProcessDummyObj(x) );
+
+            long mem1 = Profiler.GetMonoUsedSizeLong();
+            Assert.That(mem1, Is.EqualTo(startMem));
+
+            //------------------//
+            Debug.Log(string.Format("startMem = {0}, mem1 = {1}", startMem, mem1));
+        }
+
+        private static void _StaticProcessDummyObj(DummyObjA x)
+        {
+            x.v ++;
+        }
+
+        [Test]
         public void BAD_ClosureLambda()
         {
             var cont = new List<DummyObjA>();
