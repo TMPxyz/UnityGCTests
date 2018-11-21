@@ -48,7 +48,7 @@ namespace MH.GCTests
         }
 
         [Test]
-        public void BAD_MemberMethod()
+        public void BAD_MemberMethod() //Member method is indeed same as closure
         {
             var cont = new List<DummyObjA>();
             for(int i=0; i<ELEM_COUNT; ++i)
