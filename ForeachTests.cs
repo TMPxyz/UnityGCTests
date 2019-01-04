@@ -289,12 +289,27 @@ namespace MH.GCTests
         }
 
         [Test]
-        public void OK_SortedList_Keys()
+        public void OK_SortedList_Keys_With_Index()
         {
             var cont = new SortedList<int, DummyObjA>();
             for(int i=0; i<ELEM_COUNT; ++i)
                 cont.Add(i, new DummyObjA(i));
+            var dummy = cont.Keys; //the backing variable of **Keys** is a one-time only alloc
+
+            Assert.That(
+                () => 
+                {
+                    int k = 0;
+                    var keys = cont.Keys;
+                    for(int j=0; j<keys.Count; ++j)
+                        k += cont[keys[j]].v;
+                },
+                UnityEngine.TestTools.Constraints.Is.Not.AllocatingGCMemory()
+            );
+
             
+            
+            //------------------//
             GC.Collect();
             long startMem = Profiler.GetMonoUsedSizeLong();
 
@@ -311,6 +326,24 @@ namespace MH.GCTests
 
             //------------------//
             Debug.Log(string.Format("startMem = {0}, mem1 = {1}", startMem, mem1));
+        }
+
+        [Test]
+        public void BAD_SortedList_Keys_With_Foreach()
+        {
+            var cont = new SortedList<int, DummyObjA>();
+            for(int i=0; i<ELEM_COUNT; ++i)
+                cont.Add(i, new DummyObjA(i));
+            var dummy = cont.Keys; //the backing variable of **Keys** is a one-time only alloc
+            
+            Assert.That(
+                () =>
+                {
+                    var keys = cont.Keys;
+                    foreach(var o in keys) {}
+                },
+                UnityEngine.TestTools.Constraints.Is.AllocatingGCMemory()
+            );
         }
 
         [Test]
