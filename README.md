@@ -1,6 +1,8 @@
 # Unity GC Tests
 A group of unity3d unit tests for checking if some methods are **"GC Free"**
 
+**WARNING: the GC behaviours on different versions of Unity might differ, the pics at the bottom shows the result of Unity2018.3**
+
 ## How to install
 
 Method 1 : Download the whole git contents into your **Assets/Editor** directory;
