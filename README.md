@@ -17,5 +17,5 @@ Method 2 : If your project is git-ed, then you can add this git as a submodule u
 * All unit tests are supposed to pass, if any of them fails, it means the original GC results have changed
 * You're welcome to add new unit tests :D
 
-![GCTests](https://TMPxyz.github.io/images/GCtests.jpg)
+![GCTests](https://TMPxyz.github.io/images/GCTests.jpg)
 
