@@ -32,7 +32,7 @@ namespace MH.GCTests
         }
 
         [Test]
-        public void BAD_List_AddRange()
+        public void OK_List_AddRange()
         {
             var cont = new List<DummyObjA>();
             cont.AddRange(_cache);
@@ -49,14 +49,14 @@ namespace MH.GCTests
             }
 
             long mem1 = Profiler.GetMonoUsedSizeLong();
-            Assert.That(mem1, Is.GreaterThan(startMem));
+            Assert.That(mem1, Is.EqualTo(startMem));
 
             //------------------//
             Debug.Log(string.Format("startMem = {0}, mem1 = {1}", startMem, mem1));
         }
 
         [Test]
-        public void BAD_List_InsertRange()
+        public void OK_List_InsertRange()
         {
             var cont = new List<DummyObjA>();
             cont.AddRange(_cache);
@@ -73,7 +73,7 @@ namespace MH.GCTests
             }
 
             long mem1 = Profiler.GetMonoUsedSizeLong();
-            Assert.That(mem1, Is.GreaterThan(startMem));
+            Assert.That(mem1, Is.EqualTo(startMem));
 
             //------------------//
             Debug.Log(string.Format("startMem = {0}, mem1 = {1}", startMem, mem1));
@@ -101,6 +101,78 @@ namespace MH.GCTests
 
             //------------------//
             Debug.Log(string.Format("startMem = {0}, mem1 = {1}", startMem, mem1));
-        }        
+        }
+
+        [Test]
+        public void OK_HashSet_IntersectWith()
+        {
+            var cont = new HashSet<DummyObjA>();
+            cont.UnionWith(_cache);
+            cont.Clear();
+
+            GC.Collect();
+            long startMem = Profiler.GetMonoUsedSizeLong();
+
+            //------------------//
+            for(int i=0; i<LOOP_COUNT; ++i)
+            {
+                cont.Clear();
+                cont.IntersectWith(_cache);
+            }
+
+            long mem1 = Profiler.GetMonoUsedSizeLong();
+            Assert.That(mem1, Is.EqualTo(startMem));
+
+            //------------------//
+            Debug.Log(string.Format("startMem = {0}, mem1 = {1}", startMem, mem1));
+        }
+
+        [Test]
+        public void OK_HashSet_ExceptWith()
+        {
+            var cont = new HashSet<DummyObjA>();
+            cont.UnionWith(_cache);
+            cont.Clear();
+
+            GC.Collect();
+            long startMem = Profiler.GetMonoUsedSizeLong();
+
+            //------------------//
+            for(int i=0; i<LOOP_COUNT; ++i)
+            {
+                cont.Clear();
+                cont.ExceptWith(_cache);
+            }
+
+            long mem1 = Profiler.GetMonoUsedSizeLong();
+            Assert.That(mem1, Is.EqualTo(startMem));
+
+            //------------------//
+            Debug.Log(string.Format("startMem = {0}, mem1 = {1}", startMem, mem1));
+        }
+
+        [Test]
+        public void BAD_HashSet_SymExcept()
+        {
+            var cont = new HashSet<DummyObjA>();
+            cont.UnionWith(_cache);
+            cont.Clear();
+
+            GC.Collect();
+            long startMem = Profiler.GetMonoUsedSizeLong();
+
+            //------------------//
+            for(int i=0; i<LOOP_COUNT; ++i)
+            {
+                cont.Clear();
+                cont.SymmetricExceptWith(_cache);
+            }
+
+            long mem1 = Profiler.GetMonoUsedSizeLong();
+            Assert.That(mem1, Is.GreaterThan(startMem));
+
+            //------------------//
+            Debug.Log(string.Format("startMem = {0}, mem1 = {1}", startMem, mem1));
+        }
     }
 }

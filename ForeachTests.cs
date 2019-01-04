@@ -4,6 +4,9 @@ using System.Collections;
 using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine.Profiling;
+using UnityEngine.TestTools.Constraints;
+
+using Is = NUnit.Framework.Is;
 
 namespace MH.GCTests
 {
@@ -58,37 +61,88 @@ namespace MH.GCTests
         }
 
         [Test]
-        public void OK_ReadOnlyCollection()
+        public void BAD_ReadOnlyCollectionForeachAndEnumerator()
         {
             var lst = new List<DummyObjA>();
             for(int i=0; i<ELEM_COUNT; ++i)
                 lst.Add(new DummyObjA(i));
 
             var cont = lst.AsReadOnly();
-            
-            GC.Collect();
-            long startMem = Profiler.GetMonoUsedSizeLong();
+
+            Assert.That( () => 
+                { 
+                    int k = 0;
+                    foreach(var elem in cont)
+                        k += elem.v; 
+                }, 
+                UnityEngine.TestTools.Constraints.Is.AllocatingGCMemory()
+            );
+
+            Assert.That( () => 
+                {
+                    int k = 0;
+                    for(var ie = cont.GetEnumerator(); ie.MoveNext(); )
+                        k += ie.Current.v;
+                },
+                UnityEngine.TestTools.Constraints.Is.AllocatingGCMemory()
+            );
+
+            // //------------------//
+            // GC.Collect();
+            // long startMem = Profiler.GetMonoUsedSizeLong();
+            // int x = 0;
+            // for(int i=0; i<LOOP_COUNT; ++i)
+            //     foreach(var elem in cont)
+            //         x += elem.v;
+
+            // long mem1 = Profiler.GetMonoUsedSizeLong();
+            // Assert.That(mem1, Is.GreaterThan(startMem));
+
+            // //------------------//
+            // x = 0;
+            // for(int i=0; i<LOOP_COUNT; ++i)
+            //     for(var ie = cont.GetEnumerator(); ie.MoveNext(); )
+            //         x += ie.Current.v;
+
+            // long mem2 = Profiler.GetMonoUsedSizeLong();
+            // Assert.That(mem2, Is.GreaterThan(startMem));
+
+            // //------------------//
+            // Debug.Log(string.Format("startMem = {0}, mem1 = {1}, mem2 = {2}", startMem, mem1, mem2));
+            Dbg.Log("ReadOnlyCollection test");
+        }
+
+        [Test]
+        public void OK_ReadOnlyCollectionWithIndex()
+        {
+            var lst = new List<DummyObjA>();
+            for(int i=0; i<ELEM_COUNT; ++i)
+                lst.Add(new DummyObjA(i));
+
+            var cont = lst.AsReadOnly();
+
+            Assert.That( () => 
+                { 
+                    int k = 0;
+                    for(int i=0; i<cont.Count; ++i)
+                        k += cont[i].v; 
+                }, 
+                UnityEngine.TestTools.Constraints.Is.Not.AllocatingGCMemory()
+            );
 
             //------------------//
+            GC.Collect();
+            long startMem = Profiler.GetMonoUsedSizeLong();
             int x = 0;
             for(int i=0; i<LOOP_COUNT; ++i)
-                foreach(var elem in cont)
-                    x += elem.v;
+                for(int j=0; j<cont.Count; ++j)
+                    x += cont[j].v; 
 
             long mem1 = Profiler.GetMonoUsedSizeLong();
             Assert.That(mem1, Is.EqualTo(startMem));
 
             //------------------//
-            x = 0;
-            for(int i=0; i<LOOP_COUNT; ++i)
-                for(var ie = cont.GetEnumerator(); ie.MoveNext(); )
-                    x += ie.Current.v;
-
-            long mem2 = Profiler.GetMonoUsedSizeLong();
-            Assert.That(mem2, Is.EqualTo(startMem));
-
-            //------------------//
-            Debug.Log(string.Format("startMem = {0}, mem1 = {1}, mem2 = {2}", startMem, mem1, mem2));
+            Debug.Log(string.Format("startMem = {0}, mem1 = {1}", startMem, mem1));
         }
 
         [Test]
@@ -100,6 +154,24 @@ namespace MH.GCTests
             
             GC.Collect();
             long startMem = Profiler.GetMonoUsedSizeLong();
+
+            Assert.That( () => 
+                { 
+                    // int k = 0;
+                    for(var ie = cont.GetEnumerator(); ie.MoveNext(); ){}
+                        // k += ie.Current.Value.v;
+                },  
+                UnityEngine.TestTools.Constraints.Is.Not.AllocatingGCMemory()
+            );
+
+            Assert.That( () => 
+                { 
+                    // int k = 0;
+                    foreach(var elem in cont){}
+                        // k += elem.Value.v; 
+                }, 
+                UnityEngine.TestTools.Constraints.Is.Not.AllocatingGCMemory()
+            );
 
             //------------------//
             int x = 0;
