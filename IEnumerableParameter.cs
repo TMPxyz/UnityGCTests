@@ -4,6 +4,9 @@ using System.Collections;
 using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine.Profiling;
+using UnityEngine.TestTools.Constraints;
+
+using Is = NUnit.Framework.Is;
 
 namespace MH.GCTests
 {
@@ -38,6 +41,15 @@ namespace MH.GCTests
             cont.AddRange(_cache);
             cont.Clear();
 
+            Assert.That(
+                () => 
+                {
+                    cont.Clear();
+                    cont.AddRange(_cache);
+                },
+                UnityEngine.TestTools.Constraints.Is.Not.AllocatingGCMemory()
+            );
+
             GC.Collect();
             long startMem = Profiler.GetMonoUsedSizeLong();
 
@@ -61,6 +73,15 @@ namespace MH.GCTests
             var cont = new List<DummyObjA>();
             cont.AddRange(_cache);
             cont.Clear();
+
+            Assert.That(
+                () => 
+                {
+                    cont.Clear();
+                    cont.InsertRange(0, _cache);
+                },
+                UnityEngine.TestTools.Constraints.Is.Not.AllocatingGCMemory()
+            );
 
             GC.Collect();
             long startMem = Profiler.GetMonoUsedSizeLong();
