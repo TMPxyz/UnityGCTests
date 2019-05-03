@@ -6,7 +6,7 @@ using NUnit.Framework;
 using UnityEngine.Profiling;
 using UnityEngine.TestTools.Constraints;
 
-using Is = NUnit.Framework.Is;
+using Is = UnityEngine.TestTools.Constraints.Is;
 
 namespace MH.GCTests
 {
@@ -47,7 +47,7 @@ namespace MH.GCTests
                     cont.Clear();
                     cont.AddRange(_cache);
                 },
-                UnityEngine.TestTools.Constraints.Is.Not.AllocatingGCMemory()
+                Is.Not.AllocatingGCMemory()
             );
 
             GC.Collect();
@@ -80,7 +80,7 @@ namespace MH.GCTests
                     cont.Clear();
                     cont.InsertRange(0, _cache);
                 },
-                UnityEngine.TestTools.Constraints.Is.Not.AllocatingGCMemory()
+                Is.Not.AllocatingGCMemory()
             );
 
             GC.Collect();

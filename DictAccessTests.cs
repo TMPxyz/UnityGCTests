@@ -5,8 +5,7 @@ using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine.Profiling;
 using UnityEngine.TestTools.Constraints;
-
-using Is = NUnit.Framework.Is;
+using Is = UnityEngine.TestTools.Constraints.Is;
 
 namespace MH.GCTests
 {
@@ -87,16 +86,16 @@ namespace MH.GCTests
         public void BAD_AccessStructKey()
         {
             var cache = new Dictionary<Data, int>();
-            var cont = new List<int>(ELEM_COUNT);
             for(int i=0; i<ELEM_COUNT; ++i)
                 cache.Add(new Data(i, i), i);
 
             Assert.That( () => 
                 {
+                    int v = 0;
                     for(int j=0; j<ELEM_COUNT; ++j)
-                        cont.Add(cache[new Data(j,j)]);
+                        v += cache[new Data(j,j)];
                 },
-                UnityEngine.TestTools.Constraints.Is.AllocatingGCMemory()
+                Is.AllocatingGCMemory()
             );
             
             
@@ -119,6 +118,84 @@ namespace MH.GCTests
             // //------------------//
             // Debug.Log(string.Format("startMem = {0}, mem1 = {1}", startMem, mem1));
             
+        }
+
+        [Test]
+        public void OK_AccessVector3Key()
+        {
+            var cache = new Dictionary<Vector3, int>();
+            for(int i=0; i<ELEM_COUNT; ++i)
+                cache.Add(new Vector3(i, i, i), i);
+
+            Assert.That( () => 
+                {
+                    int v = 0;
+                    for(int j=0; j<ELEM_COUNT; ++j)
+                        v += cache[new Vector3(j,j,j)];
+                },
+                Is.Not.AllocatingGCMemory()
+            );
+        }
+
+        [Test]
+        public void OK_AccessIntKey()
+        {
+            var cache = new Dictionary<int, int>();
+            for(int i=0; i<ELEM_COUNT; ++i)
+                cache.Add(i, i);
+
+            Assert.That( () => 
+                {
+                    int v = 0;
+                    for(int j=0; j<ELEM_COUNT; ++j)
+                        v += cache[j];
+                },
+                Is.Not.AllocatingGCMemory()
+            );
+        }
+
+        [Test]
+        public void OK_AccessStringKey()
+        {
+            var cache = new Dictionary<string, int>(EqualityComparer<String>.Default);
+            var strings = new List<string>();
+            for(int i=0; i<ELEM_COUNT; ++i)
+            {
+                strings.Add(i.ToString());
+                cache.Add(strings[i], i);
+            }
+
+            Assert.That( () => 
+                { 
+                    EqualityComparer<String>.Default.GetHashCode(strings[0]); 
+                }, Is.Not.AllocatingGCMemory() 
+            );
+
+            //---------EQ.Defaul.GetHashCode(string var) will NOT generate gc---------//
+            string s = "helloworld"; 
+            EqualityComparer<string>.Default.GetHashCode(s);
+            Assert.That( () => 
+                {
+                    EqualityComparer<string>.Default.GetHashCode(s);
+                }, Is.Not.AllocatingGCMemory() 
+            );
+
+            //---------EQ.Default.GetHashCode(string literal / constant string) will generate gc---------//
+            EqualityComparer<string>.Default.GetHashCode("helloworld");
+            Assert.That( () => 
+                {
+                    EqualityComparer<string>.Default.GetHashCode("helloworld");
+                }, Is.AllocatingGCMemory() 
+            );
+
+            Assert.That( () => 
+                {
+                    int v = 0;
+                    for(int j=0; j<ELEM_COUNT; ++j)
+                        v += cache[strings[j]];
+                },
+                Is.Not.AllocatingGCMemory()
+            );
         }
 
         [Test]
@@ -188,7 +265,7 @@ namespace MH.GCTests
                         k += v;
                     }
                 },
-                UnityEngine.TestTools.Constraints.Is.Not.AllocatingGCMemory()
+                Is.Not.AllocatingGCMemory()
             );
             Assert.That(k, Is.EqualTo((ELEM_COUNT-1) * ELEM_COUNT / 2));
         }
@@ -232,7 +309,7 @@ namespace MH.GCTests
                         k += v;
                     }
                 },
-                UnityEngine.TestTools.Constraints.Is.Not.AllocatingGCMemory()
+                Is.Not.AllocatingGCMemory()
             );
             Assert.That(k, Is.EqualTo((ELEM_COUNT-1) * ELEM_COUNT / 2));
         }

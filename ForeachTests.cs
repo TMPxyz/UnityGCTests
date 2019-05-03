@@ -6,7 +6,7 @@ using NUnit.Framework;
 using UnityEngine.Profiling;
 using UnityEngine.TestTools.Constraints;
 
-using Is = NUnit.Framework.Is;
+using Is = UnityEngine.TestTools.Constraints.Is;
 
 namespace MH.GCTests
 {
@@ -26,6 +26,63 @@ namespace MH.GCTests
         public void Fini()
         {
             Profiler.enabled = false;
+        }
+
+        [Test]
+        public void BAD_ICollection()
+        {
+            var cont = new List<int>();
+            for(int i=0; i<ELEM_COUNT; ++i)
+                cont.Add(i);
+
+            Assert.That( () => 
+                {
+                    int v = 0;
+                    ICollection<int> icol = cont;
+                    foreach(var val in icol)
+                    {
+                        v += val;
+                    }
+                }, Is.AllocatingGCMemory() 
+            );
+        }
+
+        [Test]
+        public void BAD_IList_Foreach()
+        {
+            var cont = new List<int>();
+            for(int i=0; i<ELEM_COUNT; ++i)
+                cont.Add(i);
+
+            Assert.That( () => 
+                {
+                    int v = 0;
+                    IList<int> icol = cont;
+                    foreach(var val in icol)
+                    {
+                        v += val;
+                    }
+                }, Is.AllocatingGCMemory() 
+            );
+        }
+
+        [Test]
+        public void OK_IList_Index()
+        {
+            var cont = new List<int>();
+            for(int i=0; i<ELEM_COUNT; ++i)
+                cont.Add(i);
+
+            Assert.That( () => 
+                {
+                    int v = 0;
+                    IList<int> icol = cont;
+                    for(int i=0; i<icol.Count; ++i)
+                    {
+                        v += icol[i];
+                    }
+                }, Is.Not.AllocatingGCMemory() 
+            );
         }
 
         [Test]
@@ -75,7 +132,7 @@ namespace MH.GCTests
                     foreach(var elem in cont)
                         k += elem.v; 
                 }, 
-                UnityEngine.TestTools.Constraints.Is.AllocatingGCMemory()
+                Is.AllocatingGCMemory()
             );
 
             Assert.That( () => 
@@ -84,7 +141,7 @@ namespace MH.GCTests
                     for(var ie = cont.GetEnumerator(); ie.MoveNext(); )
                         k += ie.Current.v;
                 },
-                UnityEngine.TestTools.Constraints.Is.AllocatingGCMemory()
+                Is.AllocatingGCMemory()
             );
 
             // //------------------//
@@ -127,7 +184,7 @@ namespace MH.GCTests
                     for(int i=0; i<cont.Count; ++i)
                         k += cont[i].v; 
                 }, 
-                UnityEngine.TestTools.Constraints.Is.Not.AllocatingGCMemory()
+                Is.Not.AllocatingGCMemory()
             );
 
             //------------------//
@@ -161,7 +218,7 @@ namespace MH.GCTests
                     for(var ie = cont.GetEnumerator(); ie.MoveNext(); ){}
                         // k += ie.Current.Value.v;
                 },  
-                UnityEngine.TestTools.Constraints.Is.Not.AllocatingGCMemory()
+                Is.Not.AllocatingGCMemory()
             );
 
             Assert.That( () => 
@@ -170,7 +227,7 @@ namespace MH.GCTests
                     foreach(var elem in cont){}
                         // k += elem.Value.v; 
                 }, 
-                UnityEngine.TestTools.Constraints.Is.Not.AllocatingGCMemory()
+                Is.Not.AllocatingGCMemory()
             );
 
             //------------------//
@@ -304,7 +361,7 @@ namespace MH.GCTests
                     for(int j=0; j<keys.Count; ++j)
                         k += cont[keys[j]].v;
                 },
-                UnityEngine.TestTools.Constraints.Is.Not.AllocatingGCMemory()
+                Is.Not.AllocatingGCMemory()
             );
 
             
@@ -342,7 +399,7 @@ namespace MH.GCTests
                     var keys = cont.Keys;
                     foreach(var o in keys) {}
                 },
-                UnityEngine.TestTools.Constraints.Is.AllocatingGCMemory()
+                Is.AllocatingGCMemory()
             );
         }
 
@@ -406,36 +463,47 @@ namespace MH.GCTests
             SortedList<int, string> lst = new SortedList<int, string>();
             for(int i=0; i<ELEM_COUNT; ++i)
                 lst.Add(i, i.ToString());
+
+            foreach(var v in lst){} //warmup
             
-            GC.Collect();
-            long startMem = Profiler.GetMonoUsedSizeLong();
-            // rec0.Record();
+            // GC.Collect();
+            // long startMem = Profiler.GetMonoUsedSizeLong();
+            // // rec0.Record();
 
-            //------------------//
-            int x = 0;
-            for(int i=0; i<LOOP_COUNT; ++i)
-                foreach(var v in lst)
-                    x += v.Key;
+            // //------------------//
+            // int x = 0;
+            // for(int i=0; i<LOOP_COUNT; ++i)
+            //     foreach(var v in lst)
+            //         x += v.Key;
 
-            long mem1 = Profiler.GetMonoUsedSizeLong();
-            Assert.That(mem1, Is.GreaterThan(startMem));
-            // rec1.Record();
+            // long mem1 = Profiler.GetMonoUsedSizeLong();
+            // Assert.That(mem1, Is.EqualTo(startMem));
+            // // rec1.Record();
 
-            //------------------//
-            GC.Collect();
-            x = 0;
-            for(int i=0; i<LOOP_COUNT; ++i)
-                for(var ie = lst.GetEnumerator(); ie.MoveNext(); )
-                {
-                    x += ie.Current.Key;
-                }
+            // //------------------//
+            // GC.Collect();
+            // x = 0;
+            // for(int i=0; i<LOOP_COUNT; ++i)
+            //     for(var ie = lst.GetEnumerator(); ie.MoveNext(); )
+            //     {
+            //         x += ie.Current.Key;
+            //     }
 
-            long mem2 = Profiler.GetMonoUsedSizeLong();
-            Assert.That(mem2, Is.GreaterThan(startMem));
-            // rec2.Record();
+            // long mem2 = Profiler.GetMonoUsedSizeLong();
+            // Assert.That(mem2, Is.EqualTo(startMem));
+            // // rec2.Record();
 
-            //------------------//
-            Debug.Log(string.Format("startMem = {0}, mem1 = {1}, mem2 = {2}", startMem, mem1, mem2));
+            // //------------------//
+
+            Assert.That(
+                () => {
+                    int sum = 0;
+                    foreach(var v in lst)
+                        sum += v.Key;        
+                }, Is.AllocatingGCMemory()
+            );
+
+            // Debug.Log(string.Format("startMem = {0}, mem1 = {1}, mem2 = {2}", startMem, mem1, mem2));
             // rec0.Output();
             // rec1.Output();
             // rec2.Output();
