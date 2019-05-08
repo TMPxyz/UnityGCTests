@@ -13,19 +13,22 @@ namespace MH.GCTests
     public class Enumerate
     {
         const int ELEM_COUNT = 10;
-        const int LOOP_COUNT = 10000; //don't know why, but if the mem allocation is too small, the profiler.GetMonoUsedSizeLong cannot detect it
+        const int LOOP_COUNT = 1000; //don't know why, but if the mem allocation is too small, the profiler.GetMonoUsedSizeLong cannot detect it
+
+        List<DummyObjA> _cache = new List<DummyObjA>();
 
         [OneTimeSetUp]
         public void Init()
         {
-            GC.Collect();
-            Profiler.enabled = true;
+            for(int i=0; i<ELEM_COUNT; ++i)
+                _cache.Add(new DummyObjA(i));
+            foreach(var x in _cache) {} //warmup
         }
 
         [OneTimeTearDown]
         public void Fini()
         {
-            Profiler.enabled = false;
+            _cache.Clear();
         }
 
         [Test]
@@ -88,33 +91,20 @@ namespace MH.GCTests
         [Test]
         public void OK_List()
         {
-            var cont = new List<int>();
+            var cont = new List<DummyObjA>();
             for(int i=0; i<ELEM_COUNT; ++i)
-                cont.Add(i);
+                cont.Add(_cache[i]);
             
-            GC.Collect();
-            long startMem = Profiler.GetMonoUsedSizeLong();
-
-            //------------------//
-            int x = 0;
-            for(int i=0; i<LOOP_COUNT; ++i)
-                foreach(var v in cont)
-                    x += v;
-
-            long mem1 = Profiler.GetMonoUsedSizeLong();
-            Assert.That(mem1, Is.EqualTo(startMem));
-
-            //------------------//
-            x = 0;
-            for(int i=0; i<LOOP_COUNT; ++i)
-                for(var ie = cont.GetEnumerator(); ie.MoveNext(); )
-                    x += ie.Current;
-
-            long mem2 = Profiler.GetMonoUsedSizeLong();
-            Assert.That(mem2, Is.EqualTo(startMem));
-
-            //------------------//
-            Debug.Log(string.Format("startMem = {0}, mem1 = {1}, mem2 = {2}", startMem, mem1, mem2));
+            Assert.That( 
+                () => {
+                    int v = 0;
+                    foreach(var x in cont){ v += x.v; }
+                    for(var ie = cont.GetEnumerator(); ie.MoveNext(); )
+                    {
+                        v += ie.Current.v;
+                    }
+                }, Is.Not.AllocatingGCMemory()
+            );
         }
 
         [Test]
@@ -166,7 +156,6 @@ namespace MH.GCTests
 
             // //------------------//
             // Debug.Log(string.Format("startMem = {0}, mem1 = {1}, mem2 = {2}", startMem, mem1, mem2));
-            Dbg.Log("ReadOnlyCollection test");
         }
 
         [Test]
@@ -186,20 +175,6 @@ namespace MH.GCTests
                 }, 
                 Is.Not.AllocatingGCMemory()
             );
-
-            //------------------//
-            GC.Collect();
-            long startMem = Profiler.GetMonoUsedSizeLong();
-            int x = 0;
-            for(int i=0; i<LOOP_COUNT; ++i)
-                for(int j=0; j<cont.Count; ++j)
-                    x += cont[j].v; 
-
-            long mem1 = Profiler.GetMonoUsedSizeLong();
-            Assert.That(mem1, Is.EqualTo(startMem));
-
-            //------------------//
-            Debug.Log(string.Format("startMem = {0}, mem1 = {1}", startMem, mem1));
         }
 
         [Test]
@@ -208,48 +183,24 @@ namespace MH.GCTests
             var cont = new Dictionary<string, DummyObjA>();
             for(int i=0; i<ELEM_COUNT; ++i)
                 cont.Add(i.ToString(), new DummyObjA(i));
-            
-            GC.Collect();
-            long startMem = Profiler.GetMonoUsedSizeLong();
 
+            //warmup
+            foreach(var pr in cont){}
+            for(var ie = cont.GetEnumerator(); ie.MoveNext(); ) {}
+            
             Assert.That( () => 
                 { 
-                    // int k = 0;
                     for(var ie = cont.GetEnumerator(); ie.MoveNext(); ){}
-                        // k += ie.Current.Value.v;
                 },  
                 Is.Not.AllocatingGCMemory()
             );
 
             Assert.That( () => 
                 { 
-                    // int k = 0;
                     foreach(var elem in cont){}
-                        // k += elem.Value.v; 
                 }, 
                 Is.Not.AllocatingGCMemory()
             );
-
-            //------------------//
-            int x = 0;
-            for(int i=0; i<LOOP_COUNT; ++i)
-                foreach(var elem in cont)
-                    x += elem.Value.v;
-
-            long mem1 = Profiler.GetMonoUsedSizeLong();
-            Assert.That(mem1, Is.EqualTo(startMem));
-
-            //------------------//
-            x = 0;
-            for(int i=0; i<LOOP_COUNT; ++i)
-                for(var ie = cont.GetEnumerator(); ie.MoveNext(); )
-                    x += ie.Current.Value.v;
-
-            long mem2 = Profiler.GetMonoUsedSizeLong();
-            Assert.That(mem2, Is.EqualTo(startMem));
-
-            //------------------//
-            Debug.Log(string.Format("startMem = {0}, mem1 = {1}, mem2 = {2}", startMem, mem1, mem2));
         }
 
         [Test]
@@ -258,29 +209,18 @@ namespace MH.GCTests
             var cont = new Queue<DummyObjA>();
             for(int i=0; i<ELEM_COUNT; ++i)
                 cont.Enqueue(new DummyObjA(i));
+
+            //warmup
+            foreach(var x in cont){}
             
-            GC.Collect();
-            long startMem = Profiler.GetMonoUsedSizeLong();
-
-            int x = 0;
-            for(int i=0; i<LOOP_COUNT; ++i)
-                foreach(var elem in cont)
-                    x += elem.v;
-
-            long mem1 = Profiler.GetMonoUsedSizeLong();
-            Assert.That(mem1, Is.EqualTo(startMem));
-
-            //------------------//
-            x = 0;
-            for(int i=0; i<LOOP_COUNT; ++i)
-                for(var ie = cont.GetEnumerator(); ie.MoveNext(); )
-                    x += ie.Current.v;
-
-            long mem2 = Profiler.GetMonoUsedSizeLong();
-            Assert.That(mem2, Is.EqualTo(startMem));
-
-            //------------------//
-            Debug.Log(string.Format("startMem = {0}, mem1 = {1}, mem2 = {2}", startMem, mem1, mem2));
+            Assert.That(
+                () => {
+                    int v = 0;
+                    foreach(var x in cont) { v+=x.v; }
+                    for(var ie=cont.GetEnumerator(); ie.MoveNext(); ){  v+=ie.Current.v; }
+                },
+                Is.Not.AllocatingGCMemory()
+            );            
         }
 
         [Test]
@@ -289,29 +229,18 @@ namespace MH.GCTests
             var cont = new Stack<DummyObjA>();
             for(int i=0; i<ELEM_COUNT; ++i)
                 cont.Push(new DummyObjA(i));
+
+            //warmup
+            foreach(var x in cont){}
             
-            GC.Collect();
-            long startMem = Profiler.GetMonoUsedSizeLong();
-
-            int x = 0;
-            for(int i=0; i<LOOP_COUNT; ++i)
-                foreach(var elem in cont)
-                    x += elem.v;
-
-            long mem1 = Profiler.GetMonoUsedSizeLong();
-            Assert.That(mem1, Is.EqualTo(startMem));
-
-            //------------------//
-            x = 0;
-            for(int i=0; i<LOOP_COUNT; ++i)
-                for(var ie = cont.GetEnumerator(); ie.MoveNext(); )
-                    x += ie.Current.v;
-
-            long mem2 = Profiler.GetMonoUsedSizeLong();
-            Assert.That(mem2, Is.EqualTo(startMem));
-
-            //------------------//
-            Debug.Log(string.Format("startMem = {0}, mem1 = {1}, mem2 = {2}", startMem, mem1, mem2));
+            Assert.That(
+                () => {
+                    int v = 0;
+                    foreach(var x in cont) { v+=x.v; }
+                    for(var ie=cont.GetEnumerator(); ie.MoveNext(); ){  v+=ie.Current.v; }
+                },
+                Is.Not.AllocatingGCMemory()
+            );            
         }
 
         [Test]
@@ -320,29 +249,18 @@ namespace MH.GCTests
             var cont = new HashSet<DummyObjA>();
             for(int i=0; i<ELEM_COUNT; ++i)
                 cont.Add(new DummyObjA(i));
+
+            //warmup
+            foreach(var x in cont){}
             
-            GC.Collect();
-            long startMem = Profiler.GetMonoUsedSizeLong();
-
-            int x = 0;
-            for(int i=0; i<LOOP_COUNT; ++i)
-                foreach(var elem in cont)
-                    x += elem.v;
-
-            long mem1 = Profiler.GetMonoUsedSizeLong();
-            Assert.That(mem1, Is.EqualTo(startMem));
-
-            //------------------//
-            x = 0;
-            for(int i=0; i<LOOP_COUNT; ++i)
-                for(var ie = cont.GetEnumerator(); ie.MoveNext(); )
-                    x += ie.Current.v;
-
-            long mem2 = Profiler.GetMonoUsedSizeLong();
-            Assert.That(mem2, Is.EqualTo(startMem));
-
-            //------------------//
-            Debug.Log(string.Format("startMem = {0}, mem1 = {1}, mem2 = {2}", startMem, mem1, mem2));
+            Assert.That(
+                () => {
+                    int v = 0;
+                    foreach(var x in cont) { v+=x.v; }
+                    for(var ie=cont.GetEnumerator(); ie.MoveNext(); ){  v+=ie.Current.v; }
+                },
+                Is.Not.AllocatingGCMemory()
+            );            
         }
 
         [Test]
@@ -363,26 +281,6 @@ namespace MH.GCTests
                 },
                 Is.Not.AllocatingGCMemory()
             );
-
-            
-            
-            //------------------//
-            GC.Collect();
-            long startMem = Profiler.GetMonoUsedSizeLong();
-
-            int x = 0;
-            for(int i=0; i<LOOP_COUNT; ++i)
-            {
-                var keys = cont.Keys;
-                for(int j=0; j<keys.Count; ++j)
-                    x += cont[keys[j]].v;
-            }
-
-            long mem1 = Profiler.GetMonoUsedSizeLong();
-            Assert.That(mem1, Is.EqualTo(startMem));
-
-            //------------------//
-            Debug.Log(string.Format("startMem = {0}, mem1 = {1}", startMem, mem1));
         }
 
         [Test]
@@ -391,7 +289,10 @@ namespace MH.GCTests
             var cont = new SortedList<int, DummyObjA>();
             for(int i=0; i<ELEM_COUNT; ++i)
                 cont.Add(i, new DummyObjA(i));
+
+            // warmup
             var dummy = cont.Keys; //the backing variable of **Keys** is a one-time only alloc
+            foreach(var x in dummy){}
             
             Assert.That(
                 () =>
@@ -409,23 +310,20 @@ namespace MH.GCTests
             var cont = new Dictionary<int, DummyObjA>();
             for(int i=0; i<ELEM_COUNT; ++i)
                 cont.Add(i, new DummyObjA(i));
-            
-            GC.Collect();
-            long startMem = Profiler.GetMonoUsedSizeLong();
 
-            int x = 0;
-            for(int i=0; i<LOOP_COUNT; ++i)
-            {
-                var keys = cont.Keys;
-                for(var ie = keys.GetEnumerator(); ie.MoveNext(); )
-                    x += cont[ ie.Current ].v;
-            }
+            var keys = cont.Keys;
+            //warmup
+            foreach(var x in keys){}
 
-            long mem1 = Profiler.GetMonoUsedSizeLong();
-            Assert.That(mem1, Is.EqualTo(startMem));
-
-            //------------------//
-            Debug.Log(string.Format("startMem = {0}, mem1 = {1}", startMem, mem1));
+            Assert.That(
+                () => {
+                    int v = 0;
+                    keys = cont.Keys;
+                    foreach(var x in keys) { v += x; }
+                    for(var ie=keys.GetEnumerator(); ie.MoveNext(); ){ v += ie.Current; }
+                },
+                Is.Not.AllocatingGCMemory()
+            );
         }
 
         [Test]
@@ -435,22 +333,19 @@ namespace MH.GCTests
             for(int i=0; i<ELEM_COUNT; ++i)
                 cont.Add(i, new DummyObjA(i));
             
-            GC.Collect();
-            long startMem = Profiler.GetMonoUsedSizeLong();
+            var vals = cont.Values;
+            //warmup
+            foreach(var x in vals){}
 
-            int x = 0;
-            for(int i=0; i<LOOP_COUNT; ++i)
-            {
-                var collection = cont.Values;
-                for(var ie = collection.GetEnumerator(); ie.MoveNext(); )
-                    x += ie.Current.v;
-            }
-
-            long mem1 = Profiler.GetMonoUsedSizeLong();
-            Assert.That(mem1, Is.EqualTo(startMem));
-
-            //------------------//
-            Debug.Log(string.Format("startMem = {0}, mem1 = {1}", startMem, mem1));
+            Assert.That(
+                () => {
+                    int v = 0;
+                    vals = cont.Values;
+                    foreach(var x in vals) { v += x.v; }
+                    for(var ie=vals.GetEnumerator(); ie.MoveNext(); ){v += ie.Current.v; }
+                },
+                Is.Not.AllocatingGCMemory()
+            );
         }
 
         //////////////////////////////////////////////////////
@@ -465,35 +360,6 @@ namespace MH.GCTests
                 lst.Add(i, i.ToString());
 
             foreach(var v in lst){} //warmup
-            
-            // GC.Collect();
-            // long startMem = Profiler.GetMonoUsedSizeLong();
-            // // rec0.Record();
-
-            // //------------------//
-            // int x = 0;
-            // for(int i=0; i<LOOP_COUNT; ++i)
-            //     foreach(var v in lst)
-            //         x += v.Key;
-
-            // long mem1 = Profiler.GetMonoUsedSizeLong();
-            // Assert.That(mem1, Is.EqualTo(startMem));
-            // // rec1.Record();
-
-            // //------------------//
-            // GC.Collect();
-            // x = 0;
-            // for(int i=0; i<LOOP_COUNT; ++i)
-            //     for(var ie = lst.GetEnumerator(); ie.MoveNext(); )
-            //     {
-            //         x += ie.Current.Key;
-            //     }
-
-            // long mem2 = Profiler.GetMonoUsedSizeLong();
-            // Assert.That(mem2, Is.EqualTo(startMem));
-            // // rec2.Record();
-
-            // //------------------//
 
             Assert.That(
                 () => {
@@ -502,11 +368,6 @@ namespace MH.GCTests
                         sum += v.Key;        
                 }, Is.AllocatingGCMemory()
             );
-
-            // Debug.Log(string.Format("startMem = {0}, mem1 = {1}, mem2 = {2}", startMem, mem1, mem2));
-            // rec0.Output();
-            // rec1.Output();
-            // rec2.Output();
         }
 
         [Test]
@@ -515,35 +376,43 @@ namespace MH.GCTests
             var cont = new SortedDictionary<int, DummyObjA>();
             for(int i=0; i<ELEM_COUNT; ++i)
                 cont.Add(i, new DummyObjA(i));
-            
-            GC.Collect();
-            long startMem = Profiler.GetMonoUsedSizeLong();
 
-            //------------------//
-            int x = 0;
-            for(int i=0; i<LOOP_COUNT; ++i)
-                foreach(var elem in cont)
-                    x += elem.Value.v;
+            foreach(var pr in cont) {} //warmup
 
-            long mem1 = Profiler.GetMonoUsedSizeLong();
-            Assert.That(mem1, Is.GreaterThan(startMem));
+            Assert.That(
+                () => {
+                    foreach(var pr in cont) {}
+                },
+                Is.AllocatingGCMemory()
+            );
 
-            //------------------//
-            GC.Collect();
-            x = 0;
-            for(int i=0; i<LOOP_COUNT; ++i)
-                for(var ie = cont.GetEnumerator(); ie.MoveNext(); )
-                {
-                    x += ie.Current.Value.v;
-                }
-
-            long mem2 = Profiler.GetMonoUsedSizeLong();
-            // _OutputAll();
-            Assert.That(mem2, Is.GreaterThan(startMem));
-
-            //------------------//
-            Debug.Log(string.Format("startMem = {0}, mem1 = {1}, mem2 = {2}", startMem, mem1, mem2));
+            Assert.That(
+                () => {
+                    for(var ie = cont.GetEnumerator(); ie.MoveNext(); ){}
+                },
+                Is.AllocatingGCMemory()
+            );
         }
+
+        [Test]
+        public void BAD_SortedDictionary_Keys()
+        {
+            var cont = new SortedDictionary<int, DummyObjA>();
+            for(int i=0; i<ELEM_COUNT; ++i)
+                cont.Add(i, new DummyObjA(i));
+
+            var keys = cont.Keys;
+            // foreach(var k in keys) {} //warmup
+            for(var ie = keys.GetEnumerator(); ie.MoveNext(); ){}
+
+            Assert.That(
+                () => {
+                    for(var ie = keys.GetEnumerator(); ie.MoveNext(); ){}
+                },
+                Is.AllocatingGCMemory()
+            );
+        }
+
 
         // private void _OutputAll()
         // {

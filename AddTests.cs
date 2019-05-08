@@ -4,6 +4,9 @@ using System.Collections;
 using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine.Profiling;
+using UnityEngine.TestTools.Constraints;
+
+using Is = UnityEngine.TestTools.Constraints.Is;
 
 namespace MH.GCTests
 {
@@ -17,9 +20,6 @@ namespace MH.GCTests
         [OneTimeSetUp]
         public void Init()
         {
-            GC.Collect();
-            Profiler.enabled = true;
-
             for(int i=0; i<ELEM_COUNT; ++i)
                 _cache.Add(new DummyObjA(i));
         }
@@ -27,7 +27,6 @@ namespace MH.GCTests
         [OneTimeTearDown]
         public void Fini()
         {
-            Profiler.enabled = false;
             _cache.Clear();
         }
 
@@ -38,25 +37,13 @@ namespace MH.GCTests
             for(int i=0; i<ELEM_COUNT; ++i)
                 cont.Add(_cache[i]);
             
-            GC.Collect();
-            long startMem = Profiler.GetMonoUsedSizeLong();
-
-            //------------------//
-            for(int i=0; i<LOOP_COUNT; ++i)
-            {
-                cont.Clear();
-                for(int j=0; j<ELEM_COUNT; ++j)
-                {
-                    cont.Add(_cache[j]);
-                }
-            }
-
-            long mem1 = Profiler.GetMonoUsedSizeLong();
-            Assert.That(mem1, Is.EqualTo(startMem));
-
-            //------------------//
-            Debug.Log(string.Format("startMem = {0}, mem1 = {1}", startMem, mem1));
-            
+            cont.Clear();
+            Assert.That( 
+                () => {
+                    for(int i=0; i<ELEM_COUNT; ++i)
+                        cont.Add(_cache[i]);
+                }, Is.Not.AllocatingGCMemory()
+            );
         }
 
         [Test]
@@ -66,24 +53,13 @@ namespace MH.GCTests
             for(int i=0; i<ELEM_COUNT; ++i)
                 cont.Add(i, _cache[i]);
             
-            GC.Collect();
-            long startMem = Profiler.GetMonoUsedSizeLong();
-
-            //------------------//
-            for(int i=0; i<LOOP_COUNT; ++i)
-            {
-                cont.Clear();
-                for(int j=0; j<ELEM_COUNT; ++j)
-                {
-                    cont.Add(j, _cache[j]);
-                }
-            }
-
-            long mem1 = Profiler.GetMonoUsedSizeLong();
-            Assert.That(mem1, Is.EqualTo(startMem));
-
-            //------------------//
-            Debug.Log(string.Format("startMem = {0}, mem1 = {1}", startMem, mem1));
+            cont.Clear();
+            Assert.That( 
+                () => {
+                    for(int i=0; i<ELEM_COUNT; ++i)
+                        cont.Add(i, _cache[i]);
+                }, Is.Not.AllocatingGCMemory()
+            );
         }
 
         [Test]
@@ -93,24 +69,13 @@ namespace MH.GCTests
             for(int i=0; i<ELEM_COUNT; ++i)
                 cont.Enqueue(_cache[i]);
             
-            GC.Collect();
-            long startMem = Profiler.GetMonoUsedSizeLong();
-
-            //------------------//
-            for(int i=0; i<LOOP_COUNT; ++i)
-            {
-                cont.Clear();
-                for(int j=0; j<ELEM_COUNT; ++j)
-                {
-                    cont.Enqueue(_cache[j]);
-                }
-            }
-
-            long mem1 = Profiler.GetMonoUsedSizeLong();
-            Assert.That(mem1, Is.EqualTo(startMem));
-
-            //------------------//
-            Debug.Log(string.Format("startMem = {0}, mem1 = {1}", startMem, mem1));
+            cont.Clear();
+            Assert.That(
+                () => {
+                    for(int i=0; i<ELEM_COUNT; ++i)
+                        cont.Enqueue(_cache[i]);
+                }, Is.Not.AllocatingGCMemory()
+            );
         }
 
         [Test]
@@ -120,24 +85,13 @@ namespace MH.GCTests
             for(int i=0; i<ELEM_COUNT; ++i)
                 cont.Push(_cache[i]);
             
-            GC.Collect();
-            long startMem = Profiler.GetMonoUsedSizeLong();
-
-            //------------------//
-            for(int i=0; i<LOOP_COUNT; ++i)
-            {
-                cont.Clear();
-                for(int j=0; j<ELEM_COUNT; ++j)
-                {
-                    cont.Push(_cache[j]);
-                }
-            }
-
-            long mem1 = Profiler.GetMonoUsedSizeLong();
-            Assert.That(mem1, Is.EqualTo(startMem));
-
-            //------------------//
-            Debug.Log(string.Format("startMem = {0}, mem1 = {1}", startMem, mem1));
+            cont.Clear();
+            Assert.That(
+                () => {
+                    for(int i=0; i<ELEM_COUNT; ++i)
+                        cont.Push(_cache[i]);
+                }, Is.Not.AllocatingGCMemory()
+            );
         }
 
         [Test]
@@ -147,24 +101,13 @@ namespace MH.GCTests
             for(int i=0; i<ELEM_COUNT; ++i)
                 cont.Add(_cache[i]);
             
-            GC.Collect();
-            long startMem = Profiler.GetMonoUsedSizeLong();
-
-            //------------------//
-            for(int i=0; i<LOOP_COUNT; ++i)
-            {
-                cont.Clear();
-                for(int j=0; j<ELEM_COUNT; ++j)
-                {
-                    cont.Add(_cache[j]);
-                }
-            }
-
-            long mem1 = Profiler.GetMonoUsedSizeLong();
-            Assert.That(mem1, Is.EqualTo(startMem));
-
-            //------------------//
-            Debug.Log(string.Format("startMem = {0}, mem1 = {1}", startMem, mem1));
+            cont.Clear();
+            Assert.That(
+                () => {
+                    for(int i=0; i<ELEM_COUNT; ++i)
+                        cont.Add(_cache[i]);
+                }, Is.Not.AllocatingGCMemory()
+            );
         }
 
         [Test]
@@ -174,24 +117,13 @@ namespace MH.GCTests
             for(int i=0; i<ELEM_COUNT; ++i)
                 cont.Add(i, _cache[i]);
             
-            GC.Collect();
-            long startMem = Profiler.GetMonoUsedSizeLong();
-
-            //------------------//
-            for(int i=0; i<LOOP_COUNT; ++i)
-            {
-                cont.Clear();
-                for(int j=0; j<ELEM_COUNT; ++j)
-                {
-                    cont.Add(j, _cache[j]);
-                }
-            }
-
-            long mem1 = Profiler.GetMonoUsedSizeLong();
-            Assert.That(mem1, Is.EqualTo(startMem));
-
-            //------------------//
-            Debug.Log(string.Format("startMem = {0}, mem1 = {1}", startMem, mem1));            
+            cont.Clear();
+            Assert.That(
+                () => {
+                    for(int i=0; i<ELEM_COUNT; ++i)
+                        cont.Add(i, _cache[i]);
+                }, Is.Not.AllocatingGCMemory()
+            );
         }
 
         //////////////////////////////////////////////////////////////////
@@ -205,24 +137,13 @@ namespace MH.GCTests
             for(int i=0; i<ELEM_COUNT; ++i)
                 cont.Add(i, _cache[i]);
             
-            GC.Collect();
-            long startMem = Profiler.GetMonoUsedSizeLong();
-
-            //------------------//
-            for(int i=0; i<LOOP_COUNT; ++i)
-            {
-                cont.Clear();
-                for(int j=0; j<ELEM_COUNT; ++j)
-                {
-                    cont.Add(j, _cache[j]);
-                }
-            }
-
-            long mem1 = Profiler.GetMonoUsedSizeLong();
-            Assert.That(mem1, Is.GreaterThan(startMem));
-
-            //------------------//
-            Debug.Log(string.Format("startMem = {0}, mem1 = {1}", startMem, mem1));
+            cont.Clear();
+            Assert.That(
+                () => {
+                    for(int i=0; i<ELEM_COUNT; ++i)
+                        cont.Add(i, _cache[i]);
+                }, Is.AllocatingGCMemory()
+            );
         }
 
         [Test]
@@ -232,24 +153,13 @@ namespace MH.GCTests
             for(int i=0; i<ELEM_COUNT; ++i)
                 cont.AddLast(_cache[i]);
             
-            GC.Collect();
-            long startMem = Profiler.GetMonoUsedSizeLong();
-
-            //------------------//
-            for(int i=0; i<LOOP_COUNT; ++i)
-            {
-                cont.Clear();
-                for(int j=0; j<ELEM_COUNT; ++j)
-                {
-                    cont.AddLast(_cache[j]);
-                }
-            }
-
-            long mem1 = Profiler.GetMonoUsedSizeLong();
-            Assert.That(mem1, Is.GreaterThan(startMem));
-
-            //------------------//
-            Debug.Log(string.Format("startMem = {0}, mem1 = {1}", startMem, mem1));
+            cont.Clear();
+            Assert.That(
+                () => {
+                    for(int i=0; i<ELEM_COUNT; ++i)
+                        cont.AddLast(_cache[i]);
+                }, Is.AllocatingGCMemory()
+            );
         }
     }
 
