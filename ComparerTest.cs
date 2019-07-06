@@ -2,7 +2,6 @@ using UnityEngine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using ExtMethods;
 using NUnit.Framework;
 
 using UnityEngine.TestTools.Constraints;
