@@ -264,6 +264,23 @@ namespace MH.GCTests
         }
 
         [Test]
+        public void OK_SortedList_with_index(){
+            var cont = new SortedList<int, DummyObjA>();
+            for(int i=0; i<ELEM_COUNT; ++i)
+                cont.Add(i, new DummyObjA(i));
+
+            Assert.That(
+                () => {
+                    int ans = 0;
+                    for (int i=0; i<cont.Count; ++i){
+                        var x = cont[i];
+                        ans += x.v;
+                    }
+                }, Is.Not.AllocatingGCMemory()
+            );
+        }
+
+        [Test]
         public void OK_SortedList_Keys_With_Index()
         {
             var cont = new SortedList<int, DummyObjA>();
@@ -353,7 +370,7 @@ namespace MH.GCTests
         //////////////////////////////////////////////////////
 
         [Test]
-        public void BAD_SortedList()
+        public void BAD_SortedList_foreach()
         {
             SortedList<int, string> lst = new SortedList<int, string>();
             for(int i=0; i<ELEM_COUNT; ++i)
@@ -371,7 +388,7 @@ namespace MH.GCTests
         }
 
         [Test]
-        public void BAD_SortedDictionary()
+        public void BAD_SortedDictionary_foreach()
         {
             var cont = new SortedDictionary<int, DummyObjA>();
             for(int i=0; i<ELEM_COUNT; ++i)

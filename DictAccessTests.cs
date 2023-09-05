@@ -206,24 +206,16 @@ namespace MH.GCTests
             for(int i=0; i<ELEM_COUNT; ++i)
                 cache.Add(new Data(i, i), i);
             
-            GC.Collect();
-            long startMem = Profiler.GetMonoUsedSizeLong();
-
-            //------------------//
-            for(int i=0; i<LOOP_COUNT; ++i)
-            {
-                cont.Clear();
-                for(int j=0; j<ELEM_COUNT; ++j)
-                {
-                    cont.Add(cache[new Data(j,j)]);
-                }
-            }
-
-            long mem1 = Profiler.GetMonoUsedSizeLong();
-            Assert.That(mem1, Is.EqualTo(startMem));
-
-            //------------------//
-            Debug.Log(string.Format("startMem = {0}, mem1 = {1}", startMem, mem1));
+            cont.Clear();
+            Assert.That(
+                () => {
+                    for(int j=0; j<ELEM_COUNT; ++j)
+                    {
+                        cont.Add(cache[new Data(j,j)]);
+                    }
+                },
+                Is.Not.AllocatingGCMemory()
+            );
         }
 
         public class _DataKeyComparer : EqualityComparer<Data>

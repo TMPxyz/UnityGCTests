@@ -37,7 +37,6 @@ namespace MH.GCTests
             Assert.That( () => {EqualityComparer<string>.Default.GetHashCode(localStr);}, Is.Not.AllocatingGCMemory() ); //good for string var
             Assert.That( () => {EqualityComparer<string>.Default.GetHashCode(_globalStr);}, Is.Not.AllocatingGCMemory() ); //good for string var
             Assert.That( () => {EqualityComparer<string>.Default.GetHashCode(_constantStr);}, Is.AllocatingGCMemory() ); //bad for string constant = literal
-            Assert.That( () => {EqualityComparer<string>.Default.GetHashCode(_constantStr);}, Is.AllocatingGCMemory() ); //bad for string constant = literal
             Assert.That( () => {EqualityComparer<string>.Default.GetHashCode("XXX");}, Is.AllocatingGCMemory() ); //bad for string literal
             
         }

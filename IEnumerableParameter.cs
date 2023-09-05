@@ -53,18 +53,6 @@ namespace MH.GCTests
             GC.Collect();
             long startMem = Profiler.GetMonoUsedSizeLong();
 
-            //------------------//
-            for(int i=0; i<LOOP_COUNT; ++i)
-            {
-                cont.Clear();
-                cont.AddRange(_cache);
-            }
-
-            long mem1 = Profiler.GetMonoUsedSizeLong();
-            Assert.That(mem1, Is.EqualTo(startMem));
-
-            //------------------//
-            Debug.Log(string.Format("startMem = {0}, mem1 = {1}", startMem, mem1));
         }
 
         [Test]
@@ -83,21 +71,6 @@ namespace MH.GCTests
                 Is.Not.AllocatingGCMemory()
             );
 
-            GC.Collect();
-            long startMem = Profiler.GetMonoUsedSizeLong();
-
-            //------------------//
-            for(int i=0; i<LOOP_COUNT; ++i)
-            {
-                cont.Clear();
-                cont.InsertRange(0, _cache);
-            }
-
-            long mem1 = Profiler.GetMonoUsedSizeLong();
-            Assert.That(mem1, Is.EqualTo(startMem));
-
-            //------------------//
-            Debug.Log(string.Format("startMem = {0}, mem1 = {1}", startMem, mem1));
         }
 
         [Test]
@@ -108,20 +81,11 @@ namespace MH.GCTests
             cont.Clear();
 
             GC.Collect();
-            long startMem = Profiler.GetMonoUsedSizeLong();
-
-            //------------------//
-            for(int i=0; i<LOOP_COUNT; ++i)
-            {
-                cont.Clear();
-                cont.UnionWith(_cache);
-            }
-
-            long mem1 = Profiler.GetMonoUsedSizeLong();
-            Assert.That(mem1, Is.GreaterThan(startMem));
-
-            //------------------//
-            Debug.Log(string.Format("startMem = {0}, mem1 = {1}", startMem, mem1));
+            Assert.That(
+                () => {
+                    cont.UnionWith(_cache);
+                }, Is.AllocatingGCMemory()
+            );
         }
 
         [Test]
@@ -132,20 +96,12 @@ namespace MH.GCTests
             cont.Clear();
 
             GC.Collect();
-            long startMem = Profiler.GetMonoUsedSizeLong();
 
             //------------------//
-            for(int i=0; i<LOOP_COUNT; ++i)
-            {
-                cont.Clear();
-                cont.IntersectWith(_cache);
-            }
-
-            long mem1 = Profiler.GetMonoUsedSizeLong();
-            Assert.That(mem1, Is.EqualTo(startMem));
-
-            //------------------//
-            Debug.Log(string.Format("startMem = {0}, mem1 = {1}", startMem, mem1));
+            Assert.That(
+                () =>  cont.IntersectWith(_cache) ,
+                Is.Not.AllocatingGCMemory()
+            );
         }
 
         [Test]
@@ -156,20 +112,12 @@ namespace MH.GCTests
             cont.Clear();
 
             GC.Collect();
-            long startMem = Profiler.GetMonoUsedSizeLong();
 
             //------------------//
-            for(int i=0; i<LOOP_COUNT; ++i)
-            {
-                cont.Clear();
-                cont.ExceptWith(_cache);
-            }
-
-            long mem1 = Profiler.GetMonoUsedSizeLong();
-            Assert.That(mem1, Is.EqualTo(startMem));
-
-            //------------------//
-            Debug.Log(string.Format("startMem = {0}, mem1 = {1}", startMem, mem1));
+            Assert.That( 
+                () => cont.ExceptWith(_cache),
+                Is.Not.AllocatingGCMemory()
+            );
         }
 
         [Test]
@@ -179,21 +127,11 @@ namespace MH.GCTests
             cont.UnionWith(_cache);
             cont.Clear();
 
-            GC.Collect();
-            long startMem = Profiler.GetMonoUsedSizeLong();
-
-            //------------------//
-            for(int i=0; i<LOOP_COUNT; ++i)
-            {
-                cont.Clear();
-                cont.SymmetricExceptWith(_cache);
-            }
-
-            long mem1 = Profiler.GetMonoUsedSizeLong();
-            Assert.That(mem1, Is.GreaterThan(startMem));
-
-            //------------------//
-            Debug.Log(string.Format("startMem = {0}, mem1 = {1}", startMem, mem1));
+            Assert.That(
+                () =>cont.SymmetricExceptWith(_cache),
+                Is.AllocatingGCMemory()
+            );
+                
         }
     }
 }

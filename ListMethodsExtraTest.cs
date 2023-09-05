@@ -4,6 +4,8 @@ using System.Collections;
 using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine.Profiling;
+using UnityEngine.TestTools.Constraints;
+using Is = UnityEngine.TestTools.Constraints.Is;
 
 namespace MH.GCTests
 {
@@ -38,20 +40,12 @@ namespace MH.GCTests
             for(int i=0; i<ELEM_COUNT; ++i)
                 cont.Add(_cache[i]);
             
-            GC.Collect();
-            long startMem = Profiler.GetMonoUsedSizeLong();
-
             //------------------//
-            for(int i=0; i<LOOP_COUNT; ++i)
-            {
-                cont.Reverse();
-            }
+            Assert.That(
+                () => cont.Reverse(),
+                Is.Not.AllocatingGCMemory()
+            );
 
-            long mem1 = Profiler.GetMonoUsedSizeLong();
-            Assert.That(mem1, Is.EqualTo(startMem));
-
-            //------------------//
-            Debug.Log(string.Format("startMem = {0}, mem1 = {1}", startMem, mem1));            
         }
     }
 }
